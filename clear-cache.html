@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Browser Cache - AgriMarket</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            line-height: 1.6;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 { color: #ffd700; margin-bottom: 30px; }
+        h2 { color: #87ceeb; margin-top: 30px; }
+        .method {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 4px solid #ffd700;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            margin: 10px 5px;
+            transition: transform 0.3s;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+        }
+        .warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        code {
+            background: rgba(0,0,0,0.3);
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Clear Browser Cache for AgriMarket</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Important:</strong> You're seeing old cached files. Follow these steps to see the latest AgriMarket!
+        </div>
+
+        <h2>🔧 Quick Fix Methods:</h2>
+
+        <div class="method">
+            <h3>Method 1: Hard Refresh (Recommended)</h3>
+            <p><strong>Windows:</strong> Press <code>Ctrl + Shift + R</code></p>
+            <p><strong>Mac:</strong> Press <code>Cmd + Shift + R</code></p>
+            <p><strong>Alternative:</strong> Press <code>Ctrl + F5</code></p>
+        </div>
+
+        <div class="method">
+            <h3>Method 2: DevTools Cache Clear</h3>
+            <p>1. Press <code>F12</code> to open Developer Tools</p>
+            <p>2. Go to <strong>Application</strong> tab</p>
+            <p>3. Click <strong>Storage</strong> → <strong>Clear site data</strong></p>
+            <p>4. Refresh the page</p>
+        </div>
+
+        <div class="method">
+            <h3>Method 3: Incognito/Private Window</h3>
+            <p>Open <code>http://localhost:5173</code> in an incognito/private window</p>
+            <p><strong>Chrome:</strong> <code>Ctrl + Shift + N</code></p>
+            <p><strong>Firefox:</strong> <code>Ctrl + Shift + P</code></p>
+        </div>
+
+        <div class="method">
+            <h3>Method 4: Disable Cache (For Development)</h3>
+            <p>1. Open Developer Tools (<code>F12</code>)</p>
+            <p>2. Go to <strong>Network</strong> tab</p>
+            <p>3. Check <strong>"Disable cache"</strong></p>
+            <p>4. Keep DevTools open while browsing</p>
+        </div>
+
+        <h2>🎯 After Clearing Cache, You'll See:</h2>
+        <ul>
+            <li>✨ AgriMarket-optimized promotional banners</li>
+            <li>🔥 Live visitor counters and activity feeds</li>
+            <li>🛍️ Premium product displays with advanced animations</li>
+            <li>📱 Professional login page with sophisticated UX</li>
+            <li>⭐ Enhanced testimonials and trust indicators</li>
+        </ul>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="http://localhost:5173" class="button">🚀 Open AgriMarket</a>
+            <a href="javascript:location.reload(true)" class="button">🔄 Hard Refresh This Page</a>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px; opacity: 0.8;">
+            <small>Cache cleared? Close this tab and enjoy your premium AgriMarket experience! 🌟</small>
+        </div>
+    </div>
+
+    <script>
+        // Auto-redirect after cache instructions
+        setTimeout(() => {
+            if (confirm('Ready to open AgriMarket? Click OK to continue.')) {
+                window.open('http://localhost:5173', '_blank');
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
