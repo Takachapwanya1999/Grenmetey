@@ -2,11 +2,14 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '../types';
+import { supabase, isSupabaseConfigured } from '../services/supabaseClient';
+import { upsertProfileFromUser, fetchProfile } from '../services/profileService';
+import type { Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (userData: Partial<User>) => Promise<void>;
+  register: (userData: Partial<User> & { password?: string }) => Promise<void>;
   logout: () => void;
   loading: boolean;
 }
@@ -21,46 +24,118 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Admin allowlist via env (comma-separated emails)
+  const ADMIN_EMAILS: string[] = (
+    (import.meta as any).env?.VITE_ADMIN_EMAILS || ''
+  )
+    .split(',')
+    .map((e: string) => e.trim().toLowerCase())
+    .filter(Boolean);
+  const isAdminEmail = (email?: string | null) =>
+    !!email && ADMIN_EMAILS.includes(email.toLowerCase());
+
   useEffect(() => {
-    // Check if user is logged in from localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Error parsing stored user:', error);
-        localStorage.removeItem('user');
+    // Initialize session from Supabase
+    const init = async () => {
+      setLoading(true);
+      if (!isSupabaseConfigured) {
+        setLoading(false);
+        return;
       }
-    }
-    setLoading(false);
+      const { data } = await supabase.auth.getSession();
+      const session = data.session;
+      if (session?.user) {
+        const sbUser = session.user;
+        // Map minimal Supabase user to our User shape where possible
+        const mapped: User = {
+          id: sbUser.id,
+          email: sbUser.email || '',
+          firstName: sbUser.user_metadata?.firstName || '',
+          lastName: sbUser.user_metadata?.lastName || '',
+          phone: sbUser.user_metadata?.phone || '',
+          address: sbUser.user_metadata?.address || {
+            street: '', city: '', state: '', zipCode: '', country: ''
+          },
+          role: isAdminEmail(sbUser.email)
+            ? 'admin'
+            : ((sbUser.user_metadata?.role as User['role']) || 'customer'),
+          createdAt: new Date(sbUser.created_at),
+          isVerified: !!sbUser.app_metadata?.provider || !!sbUser.email_confirmed_at,
+        };
+        const prof = await fetchProfile(sbUser.id);
+        setUser({ ...mapped, ...(prof || {}) });
+      }
+      setLoading(false);
+    };
+    init();
+
+    // Listen to auth changes
+  if (!isSupabaseConfigured) return;
+  const { data: sub } = supabase.auth.onAuthStateChange((
+      _event: any,
+      session: Session | null
+    ) => {
+      if (session?.user) {
+        const sbUser = session.user;
+        const mapped: User = {
+          id: sbUser.id,
+          email: sbUser.email || '',
+          firstName: sbUser.user_metadata?.firstName || '',
+          lastName: sbUser.user_metadata?.lastName || '',
+          phone: sbUser.user_metadata?.phone || '',
+          address: sbUser.user_metadata?.address || {
+            street: '', city: '', state: '', zipCode: '', country: ''
+          },
+          role: isAdminEmail(sbUser.email)
+            ? 'admin'
+            : ((sbUser.user_metadata?.role as User['role']) || 'customer'),
+          createdAt: new Date(sbUser.created_at),
+          isVerified: !!sbUser.app_metadata?.provider || !!sbUser.email_confirmed_at,
+        };
+        setUser(mapped);
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const login = async (email: string, _password: string) => {
+  const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      // Mock login API call
-      // In a real app, this would make an API request
-      const mockUser: User = {
-        id: '1',
-        email,
-        firstName: 'John',
-        lastName: 'Doe',
-        phone: '+1234567890',
-        address: {
-          street: '123 Main St',
-          city: 'Springfield',
-          state: 'IL',
-          zipCode: '62701',
-          country: 'USA'
+      if (!isSupabaseConfigured) {
+        throw new Error('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.');
+      }
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      const sbUser = data.user;
+      if (!sbUser) return;
+      const mapped: User = {
+        id: sbUser.id,
+        email: sbUser.email || '',
+        firstName: sbUser.user_metadata?.firstName || '',
+        lastName: sbUser.user_metadata?.lastName || '',
+        phone: sbUser.user_metadata?.phone || '',
+        address: sbUser.user_metadata?.address || {
+          street: '', city: '', state: '', zipCode: '', country: ''
         },
-        role: 'customer',
-        createdAt: new Date(),
-        isVerified: true
+        role: isAdminEmail(sbUser.email)
+          ? 'admin'
+          : ((sbUser.user_metadata?.role as User['role']) || 'customer'),
+        createdAt: new Date(sbUser.created_at),
+        isVerified: !!sbUser.app_metadata?.provider || !!sbUser.email_confirmed_at,
       };
-      
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+  // Ensure profile exists/updated
+      try {
+        await upsertProfileFromUser(mapped);
+      } catch (e) {
+        console.warn('Profile upsert failed (non-fatal):', e);
+      }
+  setUser(mapped);
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -69,30 +144,51 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const register = async (userData: Partial<User>) => {
+  const register = async (userData: Partial<User> & { password?: string }) => {
     setLoading(true);
     try {
-      // Mock registration API call
-      const newUser: User = {
-        id: Math.random().toString(36).substr(2, 9),
-        email: userData.email || '',
-        firstName: userData.firstName || '',
-        lastName: userData.lastName || '',
-        phone: userData.phone || '',
-        address: userData.address || {
-          street: '',
-          city: '',
-          state: '',
-          zipCode: '',
-          country: ''
+      if (!isSupabaseConfigured) {
+        throw new Error('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.');
+      }
+      const { email, password, firstName, lastName, phone, address, role } = userData;
+      if (!email || !password) throw new Error('Email and password are required');
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            firstName: firstName || '',
+            lastName: lastName || '',
+            phone: phone || '',
+            address: address || { street: '', city: '', state: '', zipCode: '', country: '' },
+            role: role || 'customer',
+          }
+        }
+      });
+      if (error) throw error;
+      const sbUser = data.user;
+      if (!sbUser) return;
+      const mapped: User = {
+        id: sbUser.id,
+        email: sbUser.email || '',
+        firstName: sbUser.user_metadata?.firstName || '',
+        lastName: sbUser.user_metadata?.lastName || '',
+        phone: sbUser.user_metadata?.phone || '',
+        address: sbUser.user_metadata?.address || {
+          street: '', city: '', state: '', zipCode: '', country: ''
         },
-        role: userData.role || 'customer',
-        createdAt: new Date(),
-        isVerified: false
+        role: isAdminEmail(sbUser.email)
+          ? 'admin'
+          : ((sbUser.user_metadata?.role as User['role']) || 'customer'),
+        createdAt: new Date(sbUser.created_at),
+        isVerified: !!sbUser.app_metadata?.provider || !!sbUser.email_confirmed_at,
       };
-      
-      setUser(newUser);
-      localStorage.setItem('user', JSON.stringify(newUser));
+      try {
+        await upsertProfileFromUser(mapped);
+      } catch (e) {
+        console.warn('Profile upsert failed (non-fatal):', e);
+      }
+  setUser(mapped);
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
@@ -102,8 +198,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const logout = () => {
+    if (isSupabaseConfigured) {
+      supabase.auth.signOut();
+    }
     setUser(null);
-    localStorage.removeItem('user');
   };
 
   const value = {

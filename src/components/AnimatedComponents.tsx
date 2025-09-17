@@ -165,3 +165,63 @@ export const OurStory: React.FC = () => (
       </ul>
     </section>
   );
+  export const ReturnAndRefundPolicy: React.FC = () => (
+    <section className="bg-green-50 py-10 px-4 rounded-lg shadow-md max-w-3xl mx-auto my-8">
+      <h2 className="text-3xl font-bold text-green-700 mb-4">Return &amp; Refund Policy</h2>
+      <p className="text-gray-800 mb-6 font-semibold">www.grenmeteyinvestments.com Return &amp; Refund Policy</p>
+      <ol className="list-decimal pl-6 text-gray-900 space-y-4">
+        <li>
+          <strong>Overview</strong><br />
+          At Grenmetey Investments, customer satisfaction is our top priority. Goods can be returned under the conditions of damages, wrong order delivered, and expiry. If you are not completely satisfied with your purchase, you may return eligible items under the terms outlined below.
+        </li>
+        <li>
+          <strong>Return Window &amp; Eligibility</strong><br />
+          Products eligible for return can be returned unless explicitly stated as Non-Refundable. You may initiate a return within 24 hours of the delivery date.<br />
+          Items must be returned in their original, unused condition, with all packaging and tags intact.
+        </li>
+        <li>
+          <strong>Refunds, Exchanges &amp; Credits</strong><br />
+          Refunds will be issued using the original payment method within 7–10 business days after we receive and inspect the item.<br />
+          <em>Exchanges or Store Credit:</em> You may opt for a replacement, exchange, or store credit instead of a refund.
+        </li>
+        <li>
+          <strong>Return Shipping &amp; Restocking Fee</strong><br />
+          <em>Returned for Defect or Error:</em> If the return is due to our error (e.g., defective product, wrong item), we will cover return shipping.<br />
+          <em>Change of Mind:</em> Customers are responsible for return shipping. A restocking fee of 10% of the purchase price may apply if the item is not defective.
+        </li>
+        <li>
+          <strong>Exceptions &amp; Exclusions</strong><br />
+          Certain items may be non-returnable, such as personalized products or sealed items for hygiene reasons once opened.<br />
+          We reserve the right to refuse refunds on items returned in unsellable or used condition.
+        </li>
+        <li>
+          <strong>Fraud Prevention &amp; Abuse Mitigation</strong><br />
+          To maintain fairness and reduce abuse, we employ fraud-detection measures and may limit or deny returns for suspicious activity.
+        </li>
+        <li>
+          <strong>Legal Rights &amp; Dispute Resolution</strong><br />
+          If disputes arise, customers may pursue chargebacks via their card issuer, though the responsibility lies with the merchant to demonstrate the validity of the return.
+        </li>
+        <li>
+          <strong>How to Initiate a Return</strong><br />
+          Visit our Returns Portal and enter your order number and email.<br />
+          Select the items for return, choose your return option, and submit a request.<br />
+          Print the prepaid return label (if eligible) or ship using a carrier of your choice.<br />
+          Once the return arrives and passes inspection, we’ll process your refund or exchange.
+        </li>
+        <li>
+          <strong>Visibility &amp; Accessibility</strong><br />
+          Our return policy is prominently available via:<br />
+          <ul className="list-disc pl-6">
+            <li>A dedicated “Return Policy” page linked in the footer.</li>
+            <li>During checkout, so customers can review it before confirming purchase.</li>
+            <li>In order-confirmation emails and customer account portals.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Updates &amp; Modifications</strong><br />
+          We may update this policy periodically (at least once per year or as circumstances change), and the last updated date will be noted at the top.
+        </li>
+      </ol>
+    </section>
+  );

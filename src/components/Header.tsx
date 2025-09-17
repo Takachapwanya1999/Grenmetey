@@ -13,6 +13,7 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+  const [logoError, setLogoError] = useState(false);
   const { user, logout } = useAuth();
   const { cart } = useCart();
   const { wishlistCount } = useWishlist();
@@ -94,7 +95,7 @@ export function Header() {
 
       {/* Enhanced main header */}
       <header className="bg-white shadow-md border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto">
+  <div className="w-full">
           {/* Top utility bar - Enhanced */}
           <div className="hidden lg:block border-b border-gray-100 bg-gray-50/50">
             <div className="px-4 sm:px-6 lg:px-8">
@@ -108,6 +109,11 @@ export function Header() {
                   </Link>
                   {user ? (
                     <div className="flex items-center space-x-6">
+                      {user.role === 'admin' && (
+                        <span className="px-2 py-0.5 text-xs font-bold bg-purple-100 text-purple-700 rounded-full border border-purple-200">
+                          Admin
+                        </span>
+                      )}
                       <SmartNotificationCenter />
                       <div className="h-4 w-px bg-gray-300"></div>
                       <Link 
@@ -145,21 +151,34 @@ export function Header() {
           </div>
 
           {/* Main navigation - Enhanced */}
-          <div className="px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-20">
+          <div className="pl-0 pr-4 sm:pl-0 sm:pr-6 lg:pl-0 lg:pr-8">
+            <div className="flex items-center justify-between h-24 lg:h-28 xl:h-32">
               {/* Enhanced Logo */}
-              <Link to="/" className="flex items-center space-x-3 group">
-                <div className="relative">
-                  <div className="bg-gradient-to-br from-green-500 to-green-600 p-3 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                    <Leaf className="h-7 w-7 text-white" />
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-300 rounded-full animate-ping"></div>
+              <Link to="/" aria-label="Grenmetey Investments home" className="flex items-center space-x-2 ml-0">
+                <div className="relative flex items-center shrink-0">
+                  {logoError ? (
+                    <div className="bg-green-600 p-2 rounded-lg">
+                      <Leaf className="h-7 w-7 text-white" />
+                    </div>
+                  ) : (
+          <div className="bg-white rounded-xl p-2 ring-1 ring-green-200 shadow">
+                      <img
+                        src="/images/grenmetey-logo.png"
+                        alt="Grenmetey Investments Logo"
+                        title="Grenmetey Investments"
+            className="h-24 sm:h-28 md:h-32 lg:h-32 xl:h-36 w-auto object-contain select-none max-w-[420px] sm:max-w-[520px] md:max-w-[660px] lg:max-w-[720px] xl:max-w-[820px]"
+                        onError={() => setLogoError(true)}
+                        loading="eager"
+                        decoding="async"
+                      />
+                    </div>
+                  )}
                 </div>
-                <div className="hidden sm:block">
-                  <div className="text-2xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
+                <div className="hidden sm:block text-left">
+                  <div className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
                     Grenmetey Investments
                   </div>
-                  <div className="text-xs text-gray-500 font-medium tracking-wide -mt-1">
+                  <div className="hidden md:block text-xs md:text-sm text-gray-500 font-medium tracking-wide -mt-1">
                     Fresh • Local • Trusted
                   </div>
                 </div>
@@ -307,12 +326,14 @@ export function Header() {
                   About
                 </Link>
                 
-                <Link 
-                  to="/dashboard"
-                  className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium"
-                >
-                  Dashboard
-                </Link>
+                {user?.role === 'admin' && (
+                  <Link 
+                    to="/dashboard"
+                    className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium"
+                  >
+                    Dashboard
+                  </Link>
+                )}
               </nav>
 
               {/* Enhanced Search Bar */}
@@ -365,9 +386,14 @@ export function Header() {
                 {/* Account - Mobile */}
                 <Link 
                   to={user ? "/profile" : "/login"} 
-                  className="p-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all duration-200 xl:hidden group"
+                  className="relative p-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all duration-200 xl:hidden group"
                 >
                   <User className="h-6 w-6 group-hover:scale-110 transition-transform" />
+                  {user?.role === 'admin' && (
+                    <span className="absolute -top-1 -left-1 text-[10px] leading-none px-1.5 py-0.5 bg-purple-600 text-white rounded-full shadow">
+                      Admin
+                    </span>
+                  )}
                 </Link>
 
                 {/* Enhanced Cart - More Prominent */}

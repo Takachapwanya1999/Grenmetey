@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { CustomerAgreementModal } from '../components/CustomerAgreementModal';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle, Leaf, User, Shield, Truck, Clock, Star, ArrowRight, Gift } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -13,6 +14,7 @@ export function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showAgreement, setShowAgreement] = useState(false);
   const [recentVisitors, setRecentVisitors] = useState(0);
 
   const { login } = useAuth();
@@ -68,13 +70,12 @@ export function Login() {
     try {
       await login(formData.email, formData.password);
       setShowSuccess(true);
-      
       setTimeout(() => {
-        navigate('/');
-      }, 1500);
-      
-    } catch {
-      setErrors({ general: 'Invalid email or password. Please try again.' });
+        setShowAgreement(true);
+      }, 1000);
+    } catch (err: any) {
+      const msg = err?.message || 'Invalid email or password. Please try again.';
+      setErrors({ general: msg });
     } finally {
       setIsLoading(false);
     }
@@ -90,19 +91,25 @@ export function Login() {
 
   if (showSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center">
-        <div className="bg-white rounded-3xl shadow-2xl p-12 text-center max-w-lg transform animate-bounce-in">
-          <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="h-10 w-10 text-white" />
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-3">Welcome back to Grenmetey Investments!</h2>
-          <p className="text-gray-600 mb-6 text-lg">You're all set to discover fresh, local produce.</p>
-          <div className="flex items-center justify-center space-x-2">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
-            <span className="text-green-600 font-medium">Taking you to your dashboard...</span>
+      <>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center">
+          <div className="bg-white rounded-3xl shadow-2xl p-12 text-center max-w-lg transform animate-bounce-in">
+            <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="h-10 w-10 text-white" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Welcome back to Grenmetey Investments!</h2>
+            <p className="text-gray-600 mb-6 text-lg">You're all set to discover fresh, local produce.</p>
+            <div className="flex items-center justify-center space-x-2">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+              <span className="text-green-600 font-medium">Taking you to your dashboard...</span>
+            </div>
           </div>
         </div>
-      </div>
+  <CustomerAgreementModal open={showAgreement} onAgree={_data => {
+          setShowAgreement(false);
+          navigate('/');
+        }} />
+      </>
     );
   }
 

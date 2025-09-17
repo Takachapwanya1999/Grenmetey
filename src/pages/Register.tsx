@@ -117,6 +117,7 @@ export function Register() {
         lastName: formData.lastName,
         email: formData.email,
         phone: formData.phone,
+        password: formData.password as any,
         address: {
           street: formData.street,
           city: formData.city,
@@ -132,8 +133,9 @@ export function Register() {
         navigate('/');
       }, 2000);
       
-    } catch {
-      setErrors({ general: 'Registration failed. Please try again.' });
+    } catch (err: any) {
+      const msg = err?.message || 'Registration failed. Please try again.';
+      setErrors({ general: msg });
     } finally {
       setIsLoading(false);
     }

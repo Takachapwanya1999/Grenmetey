@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { Cobweb } from './components/Cobweb';
@@ -39,10 +40,26 @@ import { SubscriptionBoxes } from './pages/SubscriptionBoxes';
 import { AIAgriculturalAssistant } from './pages/AIAgriculturalAssistant';
 import { FinancialServices } from './pages/FinancialServices';
 import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
+import { AccessDenied } from './pages/AccessDenied';
 
 function App() {
+  // Small admin guard component
+  const RequireAdmin = ({ children }: { children: React.ReactElement }) => {
+    const { user, loading } = useAuth();
+    if (loading)
+      return (
+        <div className="w-full py-16 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-green-500 border-t-transparent"></div>
+        </div>
+      );
+  if (!user) return <Navigate to="/login" replace state={{ from: '/dashboard' }} />;
+  if (user.role !== 'admin') return <Navigate to="/access-denied" replace />;
+    return children;
+  };
+
   return (
     <AuthProvider>
       <CartProvider>
@@ -82,7 +99,14 @@ function App() {
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <RequireAdmin>
+                      <Dashboard />
+                    </RequireAdmin>
+                  }
+                />
                 <Route path="/support" element={<Support />} />
                 <Route path="/partner-dashboard" element={<PartnerDashboard />} />
                 <Route path="/advanced-partner-dashboard" element={<AdvancedPartnerDashboard />} />
@@ -102,6 +126,7 @@ function App() {
                 <Route path="/financial-services" element={<FinancialServices />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/access-denied" element={<AccessDenied />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
