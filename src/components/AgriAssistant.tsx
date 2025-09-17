@@ -5,8 +5,8 @@ import type { JSONPromptResponse, AdviceRecommendation } from '../types/jsonProm
 
 interface AgriAssistantProps {
   isOpen: boolean;
-  onClose: () => void;
-  initialQuery?: string;
+  onClose: () => void; 
+  initialQuery?: string; 
 }
 
 export function AgriAssistant({ isOpen, onClose, initialQuery = '' }: AgriAssistantProps) {
