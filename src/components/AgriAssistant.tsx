@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, Send, Loader2, Leaf, AlertCircle, Sparkles } from 'lucide-react';
 import { useJSONPrompt } from '../hooks/useJSONPrompt';
-import type { JSONPromptResponse } from '../types/jsonPrompt';
+import type { JSONPromptResponse, AdviceRecommendation } from '../types/jsonPrompt';
 
 interface AgriAssistantProps {
   isOpen: boolean;
@@ -37,10 +37,7 @@ export function AgriAssistant({ isOpen, onClose, initialQuery = '' }: AgriAssist
     error
   } = useJSONPrompt();
   
-  const [isRecording, setIsRecording] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
+  // Recording and upload helpers were removed because they are not used in the current UI.
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -292,14 +289,15 @@ export function AgriAssistant({ isOpen, onClose, initialQuery = '' }: AgriAssist
           // Product recommendation
           text += `${index + 1}. **${rec.name}** - R${rec.price}\n`;
           text += `   ${rec.description}\n`;
-          if (rec.matchReasons && rec.matchReasons.length > 0) {
-            text += `   ✓ ${rec.matchReasons.join(', ')}\n`;
+          if ((rec as any).matchReasons && (rec as any).matchReasons.length > 0) {
+            text += `   ✓ ${(rec as any).matchReasons.join(', ')}\n`;
           }
         } else {
-          // Advice recommendation
-          text += `${index + 1}. **${rec.title}**\n`;
-          text += `   ${rec.description}\n`;
-          text += `   💡 Expert Tip: ${rec.expertTip}\n`;
+          // Advice recommendation - narrow to AdviceRecommendation for TS
+          const advice = rec as AdviceRecommendation;
+          text += `${index + 1}. **${advice.title}**\n`;
+          text += `   ${advice.description}\n`;
+          text += `   💡 Expert Tip: ${advice.expertTip}\n`;
         }
         text += '\n';
       });
@@ -342,147 +340,9 @@ export function AgriAssistant({ isOpen, onClose, initialQuery = '' }: AgriAssist
     "Crop rotation benefits"
   ];
   
-  const handleVoiceInput = () => {
-    setIsRecording(!isRecording);
-    // In a real implementation, this would use the Web Speech API
-    if (!isRecording) {
-      // Start recording
-      setTimeout(() => {
-        setIsRecording(false);
-        setQuery("I recorded a voice message asking about tomato growing tips");
-      }, 3000);
-    }
-  };
+  // Removed unused handlers: image/file upload, feedback, clipboard, and regenerate helpers
   
-  const handleImageUpload = () => {
-    fileInputRef.current?.click();
-  };
-  
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setIsUploading(true);
-      // In a real implementation, this would upload the file to a server
-      setTimeout(() => {
-        setIsUploading(false);
-        
-        const userMessage = {
-          id: Date.now().toString(),
-          type: 'user' as const,
-          content: "I've uploaded an image of my plant with yellow spots. What could be wrong with it?",
-          timestamp: new Date(),
-          attachmentType: 'image' as const,
-          attachmentUrl: URL.createObjectURL(file)
-        };
-        
-        setConversation(prev => [...prev, userMessage]);
-        
-        // Simulate AI response after a short delay
-        setTimeout(async () => {
-          const response = await getPestControlAdvice("yellow spots on leaves", "tomato");
-          
-          if (response) {
-            const aiMessage = {
-              id: (Date.now() + 1).toString(),
-              type: 'assistant' as const,
-              content: formatAIResponse(response),
-              response,
-              timestamp: new Date()
-            };
-            
-            setConversation(prev => [...prev, aiMessage]);
-          }
-        }, 1500);
-      }, 1500);
-    }
-  };
-  
-  const provideFeedback = (messageId: string, feedbackType: 'positive' | 'negative') => {
-    setConversation(prev => 
-      prev.map(message => 
-        message.id === messageId 
-          ? { ...message, feedback: feedbackType } 
-          : message
-      )
-    );
-  };
-  
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    // Could show a toast notification here
-  };
-  
-  const regenerateResponse = async (messageId: string) => {
-    // Find the user message that preceded this AI message
-    const messageIndex = conversation.findIndex(m => m.id === messageId);
-    if (messageIndex <= 0) return;
-    
-    const userMessage = conversation[messageIndex - 1];
-    if (userMessage.type !== 'user') return;
-    
-    // Remove the AI message and all subsequent messages
-    setConversation(prev => prev.slice(0, messageIndex));
-    
-    // Process the user query again
-    try {
-      let response: JSONPromptResponse | null = null;
-      const userQuery = userMessage.content;
-      
-      if (userQuery.toLowerCase().includes('pest') || userQuery.toLowerCase().includes('disease')) {
-        response = await getPestControlAdvice(userQuery);
-      } else if (userQuery.toLowerCase().includes('soil') || userQuery.toLowerCase().includes('fertilizer')) {
-        response = await getSoilAdvice(userQuery);
-      } else {
-        response = await getGeneralFarmingAdvice(userQuery);
-      }
-      
-      if (response) {
-        const aiMessage = {
-          id: Date.now().toString(),
-          type: 'assistant' as const,
-          content: formatAIResponse(response),
-          response,
-          timestamp: new Date()
-        };
-        
-        setConversation(prev => [...prev, aiMessage]);
-      }
-    } catch (error) {
-      console.error('Failed to regenerate response:', error);
-    }
-  };
-  
-  const formatAIResponse = (response: JSONPromptResponse): string => {
-    if (!response.success) return "I'm sorry, I couldn't process your request.";
-    
-    let formattedResponse = '';
-    
-    if (response.data.recommendations && response.data.recommendations.length > 0) {
-      const recommendation = response.data.recommendations[0];
-      formattedResponse += `**${recommendation.title}**\n\n${recommendation.description}\n\n`;
-      
-      if ('steps' in recommendation && recommendation.steps.length > 0) {
-        formattedResponse += "**Steps:**\n";
-        recommendation.steps.forEach(step => {
-          formattedResponse += `• ${step}\n`;
-        });
-        formattedResponse += "\n";
-      }
-      
-      if ('expertTip' in recommendation) {
-        formattedResponse += `**Expert Tip:** ${recommendation.expertTip}\n\n`;
-      }
-    }
-    
-    if (response.data.insights && response.data.insights.length > 0) {
-      formattedResponse += "**Key Insights:**\n";
-      response.data.insights.forEach(insight => {
-        formattedResponse += `• ${insight}\n`;
-      });
-    }
-    
-    return formattedResponse;
-  };
+  // formatAIResponse removed — previously used for file-upload simulated responses.
 
   if (!isOpen) return null;
 

@@ -13,7 +13,7 @@ import {
   Star,
   MessageSquare,
   Download,
-  Print,
+  Printer,
   Search,
   Bell,
   Navigation
@@ -510,7 +510,7 @@ export function OrderManagementSystem() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <button className="p-2 hover:bg-white/20 rounded-full transition-colors">
-                    <Print className="h-5 w-5" />
+                    <Printer className="h-5 w-5" />
                   </button>
                   <button 
                     onClick={() => setSelectedOrder(null)}
