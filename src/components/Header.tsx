@@ -5,14 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
-import { AgriAssistant } from './AgriAssistant';
 import { SmartNotificationCenter } from './SmartNotificationCenter';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
-  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [logoError, setLogoError] = useState(false);
   const { user, logout } = useAuth();
   const { cart } = useCart();
@@ -361,14 +359,14 @@ export function Header() {
               {/* Enhanced Right Actions */}
               <div className="flex items-center space-x-2 lg:space-x-3">
                 {/* AI Assistant Button - NEW */}
-                <button
-                  onClick={() => setIsAssistantOpen(true)}
+                <Link
+                  to="/ai-assistant"
                   className="relative p-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all duration-200 hidden lg:block group"
                   title="AI Agricultural Assistant"
                 >
                   <Bot className="h-6 w-6 group-hover:scale-110 transition-transform" />
                   <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                </button>
+                </Link>
 
                 {/* Wishlist - Enhanced */}
                 <Link 
@@ -624,13 +622,6 @@ export function Header() {
           </div>
         )}
       </header>
-      
-      {/* AI Assistant Modal */}
-      <AgriAssistant 
-        isOpen={isAssistantOpen} 
-        onClose={() => setIsAssistantOpen(false)}
-        initialQuery={searchQuery}
-      />
     </>
   );
 }

@@ -49,14 +49,32 @@ function App() {
   // Small admin guard component
   const RequireAdmin = ({ children }: { children: React.ReactElement }) => {
     const { user, loading } = useAuth();
+    
+    // Development mode bypass - remove this in production
+    const isDevelopment = import.meta.env.DEV;
+    
     if (loading)
       return (
         <div className="w-full py-16 flex items-center justify-center">
           <div className="animate-spin rounded-full h-10 w-10 border-4 border-green-500 border-t-transparent"></div>
         </div>
       );
+  
   if (!user) return <Navigate to="/login" replace state={{ from: '/dashboard' }} />;
-  if (user.role !== 'admin') return <Navigate to="/access-denied" replace />;
+  
+  // In development, allow any logged-in user to access admin dashboard
+  // In production, require admin role (user.role === 'admin')
+  // Admin emails are defined in VITE_ADMIN_EMAILS environment variable
+  if (!isDevelopment && user.role !== 'admin') {
+    console.log('Access denied: User role is', user.role, 'but admin role required');
+    console.log('Admin emails configured:', import.meta.env.VITE_ADMIN_EMAILS);
+    return <Navigate to="/access-denied" replace />;
+  }
+  
+  if (isDevelopment) {
+    console.log('Development mode: Allowing dashboard access for user:', user.email, 'with role:', user.role);
+  }
+  
     return children;
   };
 

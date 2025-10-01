@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { Bot, MessageCircle, X, Sparkles } from 'lucide-react';
-import { AgriAssistant } from './AgriAssistant';
+import { useNavigate } from 'react-router-dom';
 
 export function FloatingAIButton() {
-  const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const navigate = useNavigate();
+
+  const handleAIAssistantClick = () => {
+    navigate('/ai-assistant');
+  };
 
   return (
     <>
@@ -12,7 +16,7 @@ export function FloatingAIButton() {
       <div className="fixed bottom-6 right-6 z-40">
         <div className="relative">
           {/* Expansion Panel */}
-          {isExpanded && !isOpen && (
+          {isExpanded && (
             <div className="absolute bottom-16 right-0 bg-white rounded-xl shadow-xl border border-gray-200 p-4 w-80 mb-2">
               <div className="flex items-start space-x-3">
                 <div className="bg-green-100 p-2 rounded-lg">
@@ -26,7 +30,7 @@ export function FloatingAIButton() {
                   <div className="flex space-x-2 mt-3">
                     <button
                       onClick={() => {
-                        setIsOpen(true);
+                        handleAIAssistantClick();
                         setIsExpanded(false);
                       }}
                       className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-green-700 transition-colors"
@@ -56,7 +60,7 @@ export function FloatingAIButton() {
             onClick={() => {
               if (isExpanded) {
                 setIsExpanded(false);
-                setIsOpen(true);
+                handleAIAssistantClick();
               } else {
                 setIsExpanded(true);
               }
@@ -77,7 +81,7 @@ export function FloatingAIButton() {
           </button>
 
           {/* Tooltip */}
-          {!isExpanded && !isOpen && (
+          {!isExpanded && (
             <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
               Ask Grenmetey Investments AI
               <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
@@ -86,14 +90,6 @@ export function FloatingAIButton() {
         </div>
       </div>
 
-      {/* AI Assistant Modal */}
-      <AgriAssistant 
-        isOpen={isOpen} 
-        onClose={() => {
-          setIsOpen(false);
-          setIsExpanded(false);
-        }}
-      />
     </>
   );
 }

@@ -312,6 +312,29 @@ export function Login() {
                     </>
                   )}
                 </button>
+
+                {/* Demo Login Button for Testing */}
+                {import.meta.env.DEV && (
+                  <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 mb-4">
+                    <p className="text-sm text-blue-700 text-center mb-3">
+                      🔧 <strong>Development Mode:</strong> Any email/password combination will work!
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData({
+                          email: 'chapwanyatakafakare1@gmail.com',
+                          password: 'admin123',
+                          rememberMe: false
+                        });
+                      }}
+                      className="w-full flex justify-center items-center py-3 px-6 border-2 border-orange-500 rounded-2xl shadow-lg text-sm font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 focus:outline-none focus:ring-4 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105"
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      <span>Fill Admin Credentials (Quick Test)</span>
+                    </button>
+                  </div>
+                )}
               </form>
 
               {/* Enhanced Sign Up Link */}
